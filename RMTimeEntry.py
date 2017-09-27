@@ -4,6 +4,10 @@ import csv
 from redmine import Redmine
 from datetime import datetime
 
+#關閉警告訊息
+import warnings
+warnings.filterwarnings('ignore')
+
 #Redmine帳號/密碼
 username = 'eddyteng'
 password = getpass.getpass('Please input your password: ')
@@ -19,7 +23,11 @@ def addTimeEntries(mylist):
         for row in mylist:
                 datestr = row[0].split("/")
                 date = "{0}-{1}-{2}".format(datestr[0], datestr[1].zfill(2), datestr[2].zfill(2))
-                addTimeEntry(row[5], date, row[2], row[3])
+                if float(row[3]) > 8:
+                    addTimeEntry(row[5], date, row[2])
+                    addTimeEntry(row[5], date, row[2], float(row[3])-8, True)
+                else:
+                    addTimeEntry(row[5], date, row[2], row[3])
 
 def loadCSV(path, dump=True):
         file = open(path, 'r')

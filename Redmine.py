@@ -2,6 +2,10 @@
 import getpass
 from redmine import Redmine
 
+#關閉警告訊息
+import warnings
+warnings.filterwarnings('ignore')
+
 #輸出文字是否UTF-8編碼
 text_utf8 = True
 
@@ -9,7 +13,7 @@ text_utf8 = True
 username = 'eddyteng'
 password = getpass.getpass('Please input your password: ')
 
-redmine = Redmine('https://redmine.mitake.com.tw/redmine', username=username, password=password)
+redmine = Redmine('https://redmine.mitake.com.tw/redmine', username=username, password=password, requests={'verify': False})
 
 def addTimeEntry(issue, date, work, hours=8, work_overtime=False):
         if work_overtime:
