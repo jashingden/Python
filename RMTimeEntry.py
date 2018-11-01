@@ -23,9 +23,8 @@ def addTimeEntries(mylist):
         for row in mylist:
                 datestr = row[0].split("/")
                 date = "{0}-{1}-{2}".format(datestr[0], datestr[1].zfill(2), datestr[2].zfill(2))
-                if float(row[3]) > 8:
-                    addTimeEntry(row[5], date, row[2])
-                    addTimeEntry(row[5], date, row[2], float(row[3])-8, True)
+                if row[4] != '':
+                    addTimeEntry(row[5], date, row[2], row[3], True)
                 else:
                     addTimeEntry(row[5], date, row[2], row[3])
 
