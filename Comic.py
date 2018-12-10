@@ -28,7 +28,7 @@ def parse_url(url):
     for img in img_list:
         img_url = img["src"]
         if img_url.find("cartoonmad.com") > 0:
-            file_path = folder + "/" + img_url[img_url.rfind('/')+1:]
+            file_path = os.getcwd() + "/" + folder + "/" + img_url[img_url.rfind('/')+1:]
             if not os.path.isfile(file_path):
                 print("Download " + img_url + " > " + file_path)
                 urllib.request.urlretrieve(img_url, file_path)
