@@ -25,6 +25,8 @@ url = "superlotto638/history.aspx"
 factor1 = [8,14,20,26,32]
 factor2 = [7,13,19,25,31]
 factor3 = [6,11,16,23,30]
+factorList = [factor1, factor2, factor3]
+factorDesc = ['01-07 08-13 14-19 20-25 26-31 32-38', '01-06 07-12 13-18 19-24 25-30 31-38', '01-05 06-10 11-15 16-22 23-29 30-38']
 
 def parse_url(url, year, month):
     start_url = home + url
@@ -85,14 +87,18 @@ def calcZone(row, factor):
     zone[6]=int(row[8])
     return zone
     
+def getZoneKey(zone):
+    key = str(zone[0])+str(zone[1])+str(zone[2])+str(zone[3])+str(zone[4])+str(zone[5])#+str(zone[6])
+    return key
+    
 '''
 依分區統計開獎號碼分佈
 '''
-def calcRate_m1(mylist, factor, basic = 10, dump=True):
+def calcRate_m1(mylist, factor, basic = 10, dump = False):
     rate = {}
     for row in mylist:
         zone = calcZone(row, factor)
-        key = str(zone[0])+str(zone[1])+str(zone[2])+str(zone[3])+str(zone[4])+str(zone[5])#+str(zone[6])
+        key = getZoneKey(zone)
         count = rate.get(key, 0)
         rate[key] = count+1
     i = 0
@@ -104,9 +110,15 @@ def calcRate_m1(mylist, factor, basic = 10, dump=True):
             if dump:
                 for row in mylist:
                     zone = calcZone(row, factor)
-                    key = str(zone[0])+str(zone[1])+str(zone[2])+str(zone[3])+str(zone[4])+str(zone[5])#+str(zone[6])
+                    key = getZoneKey(zone)
                     if key == item:
                         print(row)
+            else:
+                zone = calcZone(mylist[0], factor)
+                key = getZoneKey(zone)
+                if key == item:
+                    print(mylist[0])
+                
     print('total', len(rate))
 
 '''
@@ -117,7 +129,7 @@ def calcRate_m2(mylist, factor, basic = 2):
     key2 = None
     for row in mylist:
         zone = calcZone(row, factor)
-        key = str(zone[0])+str(zone[1])+str(zone[2])+str(zone[3])+str(zone[4])+str(zone[5])#+str(zone[6])
+        key = getZoneKey(zone)
         if key2 is None:
             key2 = key
             continue
@@ -134,13 +146,17 @@ def calcRate_m2(mylist, factor, basic = 2):
                 i += 1
                 print(i, item, value)
 
+def getRepeatKey(row):
+    key = row[2]+'_'+row[3]+'_'+row[4]+'_'+row[5]+'_'+row[6]+'_'+row[7]
+    return key
+    
 '''
 檢查是否有重複的開獎號碼
 '''
 def calcRepeat(mylist):
     repeat = {}
     for row in mylist:
-        key = row[2]+'_'+row[3]+'_'+row[4]+'_'+row[5]+'_'+row[6]+'_'+row[7]
+        key = getRepeatKey(row)
         count = repeat.get(key, 0)
         repeat[key] = count+1
     if len(mylist) == len(repeat):
@@ -152,9 +168,10 @@ def calcRepeat(mylist):
                 i += 1
                 print(i, item, value)
 
-def calcPrize(lotto, row):
+def calcPrize(lotto, row, dump = True):
     prize = 0
     zone = 0
+    msg = '';
     for i in range(2, 8):
         l = lotto[i]
         for j in range(2, 8):
@@ -164,50 +181,63 @@ def calcPrize(lotto, row):
                 break
     if lotto[8] == row[8]:
         if zone == 6:
-            print('恭喜中頭獎')
+            msg = '恭喜中頭獎'
         elif zone == 5:
-            print('恭喜中參獎15萬元')
+            msg = '恭喜中參獎15萬元'
             prize = 150000
         elif zone == 4:
-            print('恭喜中伍獎4千元')
+            msg = '恭喜中伍獎4千元'
             prize = 4000
         elif zone == 3:
-            print('恭喜中柒獎4百元')
+            msg = '恭喜中柒獎4百元'
             prize = 400
         elif zone == 2:
-            print('恭喜中捌獎2百元')
+            msg = '恭喜中捌獎2百元'
             prize = 200
         elif zone == 1:
-            print('恭喜中普獎1百元')
+            msg = '恭喜中普獎1百元'
             prize = 100
     else:
         if zone == 6:
-            print('恭喜中貳獎')
+            msg = '恭喜中貳獎'
         elif zone == 5:
-            print('恭喜中肆獎2萬元')
+            msg = '恭喜中肆獎2萬元'
             prize = 20000
         elif zone == 4:
-            print('恭喜中陸獎8百元')
+            msg = '恭喜中陸獎8百元'
             prize = 800
         elif zone == 3:
-            print('恭喜中玖獎1百元')        
+            msg = '恭喜中玖獎1百元'
             prize = 100
+    if dump and prize > 0:
+        print(msg)
     return prize
 
+def calcHistory(lottolist, mylist, basic = 1000):
+    total = 0
+    for lotto in lottolist:
+        for row in mylist:
+            prize = calcPrize(lotto, row, False)
+            total += prize
+            if (prize >= basic):
+                print('中獎金額', prize, lotto)
+    print('總中獎金額', total)
+    
 def calcMy(lottolist, mylist, factor):
+    print('最新開獎號碼', lottolist[0])
     repeat = {}
     for row in lottolist:
-        key = row[2]+'_'+row[3]+'_'+row[4]+'_'+row[5]+'_'+row[6]+'_'+row[7]
+        key = getRepeatKey(row)
         repeat[key] = 1
     prize = 0
     for row in mylist:
-        key = row[2]+'_'+row[3]+'_'+row[4]+'_'+row[5]+'_'+row[6]+'_'+row[7]
+        key = getRepeatKey(row)
         if repeat.get(key, 0) > 0:
             isRepeat = "repeat"
         else:
             isRepeat = "no repeat"
         zone = calcZone(row, factor)
-        key = str(zone[0])+str(zone[1])+str(zone[2])+str(zone[3])+str(zone[4])+str(zone[5])#+str(zone[6])
+        key = getZoneKey(zone)
         print(key, row, isRepeat)
         prize += calcPrize(lottolist[0], row)
     total = 100 * len(mylist)
@@ -218,13 +248,13 @@ lottolist = loadCSV('D:\EddyTeng\Git\Python\TaiwanLottery.csv', False)
 mylist = loadCSV('D:\EddyTeng\Git\Python\TaiwanLotteryMy.csv', False)
 myfactor = factor3
 print('sample count', len(lottolist))
-factorList = [factor1, factor2, factor3]
-factorDesc = ['01-07 08-13 14-19 20-25 26-31 32-38', '01-06 07-12 13-18 19-24 25-30 31-38', '01-05 06-10 11-15 16-22 23-29 30-38']
 for i in range(0, len(factorList)):
     print('factor', factorDesc[i])
     factor = factorList[i]
-    calcRate_m1(lottolist, factor, 9, False)
+    calcRate_m1(lottolist, factor, 9)
     calcRate_m2(lottolist, factor)
     print('--------------------')
 calcRepeat(lottolist)
+#calcHistory(lottolist, mylist)
 calcMy(lottolist, mylist, myfactor)
+
