@@ -16,18 +16,18 @@ import random
 第2個選號區中的01 ~ 08的號碼中任選1個號碼，
 """
 home = "https://www.taiwanlottery.com.tw/lotto/"
-name = "威力彩"
-url = "superlotto638/history.aspx"
+name = "大樂透"
+url = "Lotto649/history.aspx"
 """
-01-07 08-13 14-19 20-25 26-31 32-38
-01-06 07-12 13-18 19-24 25-30 31-38
-01-05 06-10 11-15 16-22 23-29 30-38
+01-08 09-16 17-24 25-32 33-40 41-49
+01-10 11-16 17-26 27-32 33-42 43-49
+01-09 10-17 18-25 25-33 34-40 41-49
 """
-factor1 = [8,14,20,26,32]
-factor2 = [7,13,19,25,31]
-factor3 = [6,11,16,23,30]
+factor1 = [9,17,25,33,41]
+factor2 = [11,17,27,33,43]
+factor3 = [10,18,25,34,41]
 factorList = [factor1, factor2, factor3]
-factorDesc = ['01-07 08-13 14-19 20-25 26-31 32-38', '01-06 07-12 13-18 19-24 25-30 31-38', '01-05 06-10 11-15 16-22 23-29 30-38']
+factorDesc = ['01-08 09-16 17-24 25-32 33-40 41-49', '01-10 11-17 18-24 25-31 32-39 40-49', '01-09 10-17 18-25 25-33 34-40 41-49']
 mydir = 'D:\EddyTeng\Git\Python'
 
 def parse_url(url, year=0, month=0):
@@ -46,11 +46,11 @@ def parse_url(url, year=0, month=0):
         form = page.soup.find('form')
         fields = form.findAll('input')
         formdata = dict( (field.get('name'), field.get('value')) for field in fields )
-        formdata['SuperLotto638Control_history1$dropYear'] = year
-        formdata['SuperLotto638Control_history1$dropMonth'] = month
+        formdata['Lotto649Control_history$dropYear'] = year
+        formdata['Lotto649Control_history$dropMonth'] = month
         page = browser.post(start_url, data=formdata)
     span_list = page.soup.find_all("span")
-    lotto_tag = "SuperLotto638Control_history1_dlQuery_"
+    lotto_tag = "Lotto649Control_history_dlQuery_"
     lotto_list = []
     lotto = []
     for span in span_list:
@@ -59,11 +59,28 @@ def parse_url(url, year=0, month=0):
             lotto = []
         if not (span.get("id") is None):
             sid = span["id"]
-            if lotto_tag+'DrawTerm' in sid or lotto_tag+'Date' in sid or lotto_tag+'No' in sid:
+            if lotto_tag+'L649_DrawTerm' in sid or lotto_tag+'L649_DDate' in sid or lotto_tag+'No' in sid:
                 lotto.append(span.text)
     if len(lotto) >= 9:
         lotto_list.append(lotto)
     return lotto_list
+
+'''
+def updateLottoAll(csv):
+    lottolist = []
+    for i in range(103, 110):
+        for m in range(1, 13):
+            if i == 109 and m > 2:
+                break
+            newlist = []
+            newlottolist = parse_url(url, i, m)
+            for lotto in newlottolist:
+                newlist.append(lotto)
+            lottolist = newlist + lottolist
+    if len(lottolist) > 0:
+        file = mydir + '\\' + csv
+        saveCSV(file, lottolist)
+'''
 
 def updateLotto(csv, dump=True):
     #parse_url(url, 107, 12)
@@ -100,7 +117,7 @@ def saveCSV(path, mylist):
 
 def calcZone(row, factor):
     zone = [0,0,0,0,0,0,0]
-    numbers = [int(row[2]), int(row[3]), int(row[4]), int(row[5]), int(row[6]), int(row[7])]
+    numbers = [int(row[3]), int(row[4]), int(row[5]), int(row[6]), int(row[7]), int(row[8])]
     for num in numbers:
         if num < factor[0]:
             zone[0] = zone[0]+1
@@ -114,7 +131,7 @@ def calcZone(row, factor):
             zone[4] = zone[4]+1
         else:
             zone[5] = zone[5]+1
-    zone[6]=int(row[8])
+    zone[6]=int(row[2])
     return zone
     
 def getZoneKey(zone):
@@ -188,7 +205,7 @@ def calcRate_m2(mylist, factor, basic = 2):
                 print(i, item, value)
 
 def getRepeatKey(row):
-    key = row[2]+'_'+row[3]+'_'+row[4]+'_'+row[5]+'_'+row[6]+'_'+row[7]
+    key = row[3]+'_'+row[4]+'_'+row[5]+'_'+row[6]+'_'+row[7]+'_'+row[8]
     return key
     
 '''
@@ -213,43 +230,42 @@ def calcPrize(lotto, row, dump = True):
     prize = 0
     zone = 0
     msg = '';
-    for i in range(2, 8):
+    for i in range(3, 9):
         l = lotto[i]
-        for j in range(2, 8):
+        for j in range(3, 9):
             r = row[j]
             if r == l:
                 zone += 1
                 break
-    if lotto[8] == row[8]:
+    special = False
+    for n in range(3, 9):
+        if lotto[2] == row[n]:
+            special = True
+            break;
+    if special:
         if zone == 6:
             msg = '恭喜中頭獎'
         elif zone == 5:
-            msg = '恭喜中參獎15萬元'
-            prize = 150000
+            msg = '恭喜中貳獎'
         elif zone == 4:
-            msg = '恭喜中伍獎4千元'
-            prize = 4000
+            msg = '恭喜中肆獎'
         elif zone == 3:
+            msg = '恭喜中陸獎1千元'
+            prize = 1000
+        elif zone == 2:
             msg = '恭喜中柒獎4百元'
             prize = 400
-        elif zone == 2:
-            msg = '恭喜中捌獎2百元'
-            prize = 200
-        elif zone == 1:
-            msg = '恭喜中普獎1百元'
-            prize = 100
     else:
         if zone == 6:
-            msg = '恭喜中貳獎'
+            msg = '恭喜中頭獎'
         elif zone == 5:
-            msg = '恭喜中肆獎2萬元'
-            prize = 20000
+            msg = '恭喜中參獎'
         elif zone == 4:
-            msg = '恭喜中陸獎8百元'
-            prize = 800
+            msg = '恭喜中伍獎2千元'
+            prize = 2000
         elif zone == 3:
-            msg = '恭喜中玖獎1百元'
-            prize = 100
+            msg = '恭喜中普獎4百元'
+            prize = 400
     if dump and (prize > 0 or len(msg) > 0):
         print(msg)
     return prize
@@ -301,7 +317,7 @@ def pickMy(lottolist, factor, basic = 10):
     rateItem = calcRate_m1(lottolist, factor, basic)
     f = [1]
     f.extend(factor)
-    f.append(39)
+    f.append(50)
     for item in rateItem:
         mylotto = []
         count = getZoneCount(item)
@@ -313,7 +329,6 @@ def pickMy(lottolist, factor, basic = 10):
                     mylotto.append(num)
                     c -= 1
             i += 1
-        mylotto.append(random.randint(1, 8))
         print(item, mylotto)
         my = [lottolist[0][0], lottolist[0][1]]
         my.extend(mylotto)
@@ -322,16 +337,15 @@ def pickMy(lottolist, factor, basic = 10):
 
 
 #更新各期獎號
-updateLotto('TaiwanLottery.csv')
+updateLotto('TaiwanLottery649.csv')
 
-lottolist = loadCSV(mydir + '\\' + 'TaiwanLottery.csv', False)
+lottolist = loadCSV(mydir + '\\' + 'TaiwanLottery649.csv', False)
 showFactorRate(lottolist)
 
-# [6,11,16,23,30] '01-05 06-10 11-15 16-22 23-29 30-38'
-myfactor = factor1
+myfactor = factor2
 #mylist = pickMy(lottolist, myfactor, 10)
 
-mylist = loadCSV(mydir + '\\' + 'TaiwanLotteryMy.csv', False)
+mylist = loadCSV(mydir + '\\' + 'TaiwanLotteryMy649.csv', False)
 #calcHistory(lottolist, mylist)
 calcMy(lottolist, mylist, myfactor)
 
