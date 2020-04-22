@@ -82,6 +82,7 @@ def updateLotto(csv, dump=True):
             print('有新的開獎號碼:', newlist)
         lottolist = newlist + lottolist
         saveCSV(file, lottolist)
+    return newlist
 
 # ['107000095', '107/11/26', '01', '16', '25', '30', '31', '32', '07']
 def loadCSV(path, dump=True):
@@ -266,8 +267,8 @@ def calcHistory(lottolist, mylist, basic = 1000):
     print('總花費', cost, '總中獎金額', total)
     return total
     
-def calcMy(lottolist, mylist, factor):
-    print('最新開獎號碼', lottolist[0])
+def calcMy(lotto, lottolist, mylist, factor):
+    print('最新開獎號碼', lotto)
     repeat = {}
     for row in lottolist:
         key = getRepeatKey(row)
@@ -282,7 +283,7 @@ def calcMy(lottolist, mylist, factor):
         zone = calcZone(row, factor)
         key = getZoneKey(zone)
         print(key, row, isRepeat)
-        prize += calcPrize(lottolist[0], row)
+        prize += calcPrize(lotto, row)
     total = 100 * len(mylist)
     print('總花費', total, '中獎金額', prize)
 
@@ -322,7 +323,7 @@ def pickMy(lottolist, factor, basic = 10):
 
 
 #更新各期獎號
-updateLotto('TaiwanLottery.csv')
+newlist = updateLotto('TaiwanLottery.csv')
 
 lottolist = loadCSV(mydir + '\\' + 'TaiwanLottery.csv', False)
 showFactorRate(lottolist)
@@ -333,5 +334,6 @@ myfactor = factor1
 
 mylist = loadCSV(mydir + '\\' + 'TaiwanLotteryMy.csv', False)
 #calcHistory(lottolist, mylist)
-calcMy(lottolist, mylist, myfactor)
+for lotto in newlist:
+    calcMy(lotto, lottolist, mylist, myfactor)
 
