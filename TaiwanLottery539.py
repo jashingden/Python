@@ -10,6 +10,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 import mechanicalsoup
 import random
+from mysys import *
 
 """
 第1個選號區中的01 ~ 38的號碼中任選6個號碼，
@@ -28,7 +29,6 @@ factor2 = [11,17,27,33]
 factor3 = [10,18,25,34]
 factorList = [factor1, factor2, factor3]
 factorDesc = ['01-08 09-16 17-24 25-32 33-39', '01-10 11-16 17-26 27-32 33-39', '01-09 10-17 18-25 25-33 34-39']
-mydir = 'D:\EddyTeng\Git\Python'
 
 def parse_url(url, year=0, month=0):
     start_url = home + url
@@ -78,14 +78,14 @@ def updateLottoAll(csv):
                 newlist.append(lotto)
             lottolist = newlist + lottolist
     if len(lottolist) > 0:
-        file = mydir + '\\' + csv
+        file = mydir + csv
         saveCSV(file, lottolist)
 '''
 
 def updateLotto(csv, dump=True):
     #parse_url(url, 107, 12)
     newlottolist = parse_url(url)
-    file = mydir + '\\' + csv
+    file = mydir + csv
     lottolist = loadCSV(file, False)
     curr = lottolist[0][0]
     newlist = []
@@ -320,13 +320,13 @@ def pickMy(lottolist, factor, basic = 50):
 #更新各期獎號
 newlist = updateLotto('TaiwanLottery539.csv')
 
-lottolist = loadCSV(mydir + '\\' + 'TaiwanLottery539.csv', False)
+lottolist = loadCSV(mydir + 'TaiwanLottery539.csv', False)
 showFactorRate(lottolist)
 
 myfactor = factor1
 #mylist = pickMy(lottolist, myfactor, 50)
 
-mylist = loadCSV(mydir + '\\' + 'TaiwanLotteryMy539.csv', False)
+mylist = loadCSV(mydir + 'TaiwanLotteryMy539.csv', False)
 #calcHistory(lottolist, mylist)
 for lotto in newlist:
     calcMy(lotto, lottolist, mylist, myfactor)
