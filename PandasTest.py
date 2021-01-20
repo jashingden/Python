@@ -49,6 +49,21 @@ def saveCSV(path, mylist):
     writer = csv.writer(file)
     writer.writerows(mylist)
 
+def showChart(stk_sort):
+    idx = 0
+    for info in stk_sort:
+        idx += 1
+        if idx > 10:
+            break
+        end = int(info[2]) + 1
+        start = end - comp_len
+        stk = all_stock[start:end]
+        close = stk[:,6]
+        close = close.astype(np.float)
+        name = info[0] + ':  ' + str(round(float(info[3]) * 100, 2)) + '%'
+        df = pd.DataFrame(close, columns=[name])
+        df.plot()
+
 in_file = 'D:\MITAKE\VSProject\MitakeSmartV2\Project\deploy\DailyK_20210104.csv'
 out_file = 'D:\MITAKE\VSProject\MitakeSmartV2\Project\deploy\SimilarK_20210104.csv'
 
@@ -97,4 +112,5 @@ sort = stk_sort[:,3]
 sort = sort.astype(np.float)
 stk_sort = stk_sort[np.argsort(sort)][::-1]
 
-saveCSV(out_file, stk_sort)
+#saveCSV(out_file, stk_sort)
+showChart(stk_sort)
