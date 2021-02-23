@@ -111,17 +111,17 @@ def getSimilarK(in_file, base_id, comp_len):
     return all_stock, stk_sort
 
 def get_mink(stk, k_len):
-    o = stk[:,7][:k_len]
+    o = stk[:,2][:k_len]
     o = o.astype(np.float)
-    h = stk[:,8][:k_len]
+    h = stk[:,3][:k_len]
     h = h.astype(np.float)
-    l = stk[:,9][:k_len]
+    l = stk[:,4][:k_len]
     l = l.astype(np.float)
-    c = stk[:,10][:k_len]
+    c = stk[:,5][:k_len]
     c = c.astype(np.float)
     return [o, h, l, c]
 
-def showFutChart(txff, txff_sort):
+def showFutChart(txff, txff_sort, k_len=300):
     idx = 0
     for info in txff_sort:
         idx += 1
@@ -130,8 +130,11 @@ def showFutChart(txff, txff_sort):
         start = int(info[1])
         end = int(info[2]) + 1
         fut = txff[start:end]
-        close = fut[:,10]
+        close = fut[:,5]
+        pad_len = k_len - len(close)
         close = close.astype(np.float)
+        pad_close = float(close[-1])
+        close = np.pad(close, (0, pad_len), 'constant', constant_values=(0,pad_close))
         name = info[0] + ':  ' + str(round(float(info[3]) * 100, 2)) + '%'
         df = pd.DataFrame(close, columns=[name])
         df.plot()
@@ -139,7 +142,7 @@ def showFutChart(txff, txff_sort):
 def readMin1K(in_file):
     txff = pd.read_csv(in_file, header=1, dtype='str')
     txff = np.array(txff)
-    txff_date = txff[:,3]
+    txff_date = txff[:,0]
     date = ''
     txff_info = []
     info = []
@@ -179,20 +182,20 @@ def getSimilarMin1K(in_file, comp_len=300):
     txff_sort = txff_sort[np.argsort(sort)][::-1]
     return txff, txff_sort
 
-    
-#mydir = 'D:\MITAKE\VSProject\MitakeSmartV2\Project\deploy\'
-mydir = '/home/jashingden/GitHub/'
+
+mydir = 'D:\\MITAKE\\VSProject\\MitakeSmartV2\\Project\\deploy\\'
+#mydir = '/home/jashingden/GitHub/'
 in_file = mydir + 'DailyK_20210104.csv'
 out_file = mydir + 'SimilarK.csv'
-min_file = mydir + 'TXFF_Min1K_20210115.csv'
+min_file = mydir + 'TXFF_Min1K_Data.csv'
 
 base_id = '6488'
 k_len = 1000
 comp_len = 100
-all_stock, stk_sort = getSimilarK(in_file, base_id, comp_len)
+#all_stock, stk_sort = getSimilarK(in_file, base_id, comp_len)
 #saveCSV(out_file, stk_sort)
-showChart(all_stock, stk_sort, comp_len)
+#showChart(all_stock, stk_sort, comp_len)
 
-#txff, txff_sort = getSimilarMin1K(min_file, 120)
+txff, txff_sort = getSimilarMin1K(min_file, 100)
 #saveCSV(out_file, txff_sort)
-#showFutChart(txff, txff_sort)
+showFutChart(txff, txff_sort)
