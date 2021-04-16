@@ -5,6 +5,7 @@ Created on Fri Nov  2 17:22:01 2018
 @author: eddyteng
 """
 import os
+import sys
 import csv
 import urllib.request
 from bs4 import BeautifulSoup
@@ -309,12 +310,17 @@ def pickMy(lottolist, factor, basic = 10):
         i = 0
         for c in count:
             while c > 0:
-                num = random.randint(f[i],f[i+1]-1)
+                num = str(random.randint(f[i],f[i+1]-1))
+                if len(num) == 1:
+                    num = '0' + num
                 if num not in mylotto:
                     mylotto.append(num)
                     c -= 1
             i += 1
-        mylotto.append(random.randint(1, 8))
+        num = str(random.randint(1, 8))
+        if len(num) == 1:
+            num = '0' + num
+        mylotto.append(num)
         print(item, mylotto)
         my = [lottolist[0][0], lottolist[0][1]]
         my.extend(mylotto)
@@ -322,18 +328,37 @@ def pickMy(lottolist, factor, basic = 10):
     return mylist
 
 
-#更新各期獎號
-newlist = updateLotto('TaiwanLottery.csv')
-
-lottolist = loadCSV(mydir + 'TaiwanLottery.csv', False)
-showFactorRate(lottolist)
-
 # [6,11,16,23,30] '01-05 06-10 11-15 16-22 23-29 30-38'
 myfactor = factor1
-#mylist = pickMy(lottolist, myfactor, 10)
 
-mylist = loadCSV(mydir + 'TaiwanLotteryMy.csv', False)
-#calcHistory(lottolist, mylist)
-for lotto in newlist:
-    calcMy(lotto, lottolist, mylist, myfactor)
+if len(sys.argv) > 1 and sys.argv[1] == "my":
+    lottolist = loadCSV(mydir + 'TaiwanLottery.csv', False)
+    mylist = pickMy(lottolist, myfactor, 10)
+    if len(sys.argv) > 2:
+        pick = int(sys.argv[2])
+        if pick > 0 and pick < len(mylist):
+            lotto = mylist[pick-1]
+            file = mydir + 'TaiwanLotteryMy.csv'
+            lottolist = [lotto]
+            saveCSV(file, lottolist)
+            print(lotto)
+    else:
+        for lotto in mylist:
+            print(lotto)
+
+elif len(sys.argv) > 1 and sys.argv[1] == "history":
+    lottolist = loadCSV(mydir + 'TaiwanLottery.csv', False)
+    mylist = loadCSV(mydir + 'TaiwanLotteryMy.csv', False)
+    calcHistory(lottolist, mylist)
+
+else:
+    #更新各期獎號
+    newlist = updateLotto('TaiwanLottery.csv')
+    
+    lottolist = loadCSV(mydir + 'TaiwanLottery.csv', False)
+    showFactorRate(lottolist)
+
+    mylist = loadCSV(mydir + 'TaiwanLotteryMy.csv', False)
+    for lotto in newlist:
+        calcMy(lotto, lottolist, mylist, myfactor)
 

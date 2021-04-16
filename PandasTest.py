@@ -183,8 +183,8 @@ def getSimilarMin1K(in_file, comp_len=300):
     return txff, txff_sort
 
 
-mydir = 'D:\\MITAKE\\VSProject\\MitakeSmartV2\\Project\\deploy\\'
-#mydir = '/home/jashingden/GitHub/'
+#mydir = 'D:\\MITAKE\\VSProject\\MitakeSmartV2\\Project\\deploy\\'
+mydir = '/home/jashingden/GitHub/'
 in_file = mydir + 'DailyK_20210104.csv'
 out_file = mydir + 'SimilarK.csv'
 min_file = mydir + 'TXFF_Min1K_Data.csv'
