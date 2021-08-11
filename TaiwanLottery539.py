@@ -348,6 +348,7 @@ else:
     lottolist = loadCSV(mydir + 'TaiwanLottery539.csv', False)
     showFactorRate(lottolist)
 
+    mylist = loadCSV(mydir + 'TaiwanLotteryMy539.csv', False)
     for lotto in newlist:
         calcMy(lotto, lottolist, mylist, myfactor)
 
